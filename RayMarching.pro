@@ -28,12 +28,14 @@ SOURCES += \
         main.cpp \
         widget.cpp \
     graymarching.cpp \
-    gsigndistancefunction.cpp
+    gsigndistancefunction.cpp \
+    gshape.cpp
 
 HEADERS += \
         widget.h \
     graymarching.h \
-    gsigndistancefunction.h
+    gsigndistancefunction.h \
+    gshape.h
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

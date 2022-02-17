@@ -1,5 +1,6 @@
 #include "graymarching.h"
 #include "gsigndistancefunction.h"
+#include "gshape.h"
 #include <QtMath>
 #include <QtDebug>
 
@@ -32,7 +33,7 @@ void GRayMarching::draw_2d()
             float value = this->sample_2d(p0);
             if(value > 1.0f) value = 1.0f;
             if(value < 0.0f) value = 0.0f;
-            int c = (int)value*255;
+            int c = static_cast<int>(value*255);
             m_image.setPixelColor(x, y, QColor(c,c,c));
         }
     }
@@ -42,11 +43,11 @@ void GRayMarching::draw_2d()
 float GRayMarching::sample_2d(QVector2D& p0)
 {
     float sum = 0.0f;
-    int count = 10;
+    int count = 100;
     for(int i = 0; i < count; ++i)
     {
-        float sita = 2.0f*M_PI*qrand()/RAND_MAX;
-        QVector2D dir = QVector2D(qCos(sita), qSin(sita));
+        double sita = 2.0*M_PI*qrand()/RAND_MAX;
+        QVector2D dir = QVector2D( static_cast<float>(qCos(sita)), static_cast<float>(qSin(sita)));
         sum += this->rayMarching_2d(p0, dir);
     }
     return sum/count;
@@ -58,18 +59,19 @@ float GRayMarching::rayMarching_2d(QVector2D& p0, QVector2D& dir)
     for(int i = 0; i < 10; ++i)
     {
         QVector2D p1 = p0 + dir*t;
-        float dis = sdf_2d(p1);
-        if(dis < 0.01f) return 1.0;
-        t += dis;
+        GShape shape = scene_2d(p1);
+        if(shape.m_sdf < 0.001f) return shape.m_emissive;
+        t += shape.m_sdf;
     }
 
     return 0.0f;
 }
 
-float GRayMarching::sdf_2d(QVector2D& p1)
+GShape GRayMarching::scene_2d(QVector2D& p1)
 {
-    QVector2D c0 = QVector2D(0.5f, 0.5f);
-    float r = 0.1f;
-    return GSignDistanceFunction::circle(p1, c0, r);
+    GShape r1 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.3f, 0.3f), 0.1f), 2.0f);
+    GShape r2 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.3f, 0.7f), 0.05f), 0.8f);
+    GShape r3 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.7f, 0.5f), 0.1f), 0.0f);
+    return GShape::unionOp(GShape::unionOp(r1, r2), r3);
 }
 

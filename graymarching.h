@@ -4,6 +4,7 @@
 #include <QImage>
 #include <QSize>
 #include <QColor>
+#include "gshape.h"
 
 class GRayMarching
 {
@@ -18,7 +19,7 @@ private:
     void draw_2d();
     float sample_2d(QVector2D& p0);
     float rayMarching_2d(QVector2D& p0, QVector2D& dir);
-    float sdf_2d(QVector2D& p1);
+    GShape scene_2d(QVector2D& p1);
 
 public:
     QImage m_image; //输出图像
