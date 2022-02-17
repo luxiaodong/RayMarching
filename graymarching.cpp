@@ -56,7 +56,7 @@ float GRayMarching::sample_2d(QVector2D& p0)
 float GRayMarching::rayMarching_2d(QVector2D& p0, QVector2D& dir)
 {
     float t = 0.0f;
-    for(int i = 0; i < 10; ++i)
+    for(int i = 0; i < 50; ++i)
     {
         QVector2D p1 = p0 + dir*t;
         GShape shape = scene_2d(p1);
@@ -69,9 +69,17 @@ float GRayMarching::rayMarching_2d(QVector2D& p0, QVector2D& dir)
 
 GShape GRayMarching::scene_2d(QVector2D& p1)
 {
-    GShape r1 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.3f, 0.3f), 0.1f), 2.0f);
-    GShape r2 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.3f, 0.7f), 0.05f), 0.8f);
-    GShape r3 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.7f, 0.5f), 0.1f), 0.0f);
-    return GShape::unionOp(GShape::unionOp(r1, r2), r3);
+//    return GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f, 0.5f), 0.1f), 1.0f);
+
+//    GShape r1 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.3f, 0.3f), 0.1f), 2.0f);
+//    GShape r2 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.3f, 0.7f), 0.05f), 0.8f);
+//    GShape r3 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.7f, 0.5f), 0.1f), 0.0f);
+//    return GShape::unionOp(GShape::unionOp(r1, r2), r3);
+
+    GShape r4 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.4f, 0.5f), 0.2f), 1.0f);
+    GShape r5 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.6f, 0.5f), 0.2f), 0.8f);
+//    return GShape::unionOp(r4, r5);
+//    return GShape::intersectOp(r4, r5);
+    return GShape::subtractOp(r4, r5);
 }
 
