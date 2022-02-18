@@ -18,17 +18,21 @@ public:
 private:
     void draw_2d();
     float sample_2d(QVector2D& p0);
-    float rayMarching_2d(QVector2D& p0, QVector2D& dir);
+    float rayMarching_2d(QVector2D& p0, QVector2D& dir, int depth);
     QVector2D normal_2d(QVector2D& p0);
     GShape scene_2d(QVector2D& p1);
+    QVector2D reflect_2D(QVector2D in, QVector2D n);
 
 public:
     QImage m_image; //输出图像
+    QString m_filePath; //保存路径
 
     int m_sampleCount;
-    int m_maxStepCount;
+    int m_stepCount;
+    int m_maxDepth;
     float m_maxDistance;
-    float m_maxEpsilon;
+    float m_epsilon;
+    float m_normalBais;
 };
 
 #endif // GRAYMARCHING_H

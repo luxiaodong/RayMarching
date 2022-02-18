@@ -5,7 +5,7 @@
 Widget::Widget(QWidget *parent)
     : QWidget(parent) , m_hasDraw(false)
 {
-    this->resize(600,600);
+    this->resize(1024,1024);
 }
 
 Widget::~Widget()

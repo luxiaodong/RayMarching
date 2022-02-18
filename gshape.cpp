@@ -1,13 +1,14 @@
 #include "gshape.h"
 #include <QtMath>
 
-GShape::GShape(float sdf, float emissive)
+GShape::GShape(float sdf, float emissive, float reflectivity)
 {
     m_sdf = sdf;
     m_emissive = emissive;
+    m_reflectivity = reflectivity;
 }
 
-GShape& GShape::unionOp(GShape& one, GShape& other)
+GShape GShape::unionOp(GShape one, GShape other)
 {
     if(one.m_sdf < other.m_sdf)
     {
@@ -17,7 +18,7 @@ GShape& GShape::unionOp(GShape& one, GShape& other)
     return other;
 }
 
-GShape GShape::intersectOp(GShape& one, GShape& other)
+GShape GShape::intersectOp(GShape one, GShape other)
 {
     GShape s = one;
     s.m_sdf = qMax(one.m_sdf, other.m_sdf);
@@ -25,7 +26,7 @@ GShape GShape::intersectOp(GShape& one, GShape& other)
     return s;
 }
 
-GShape GShape::subtractOp(GShape& one, GShape& other)
+GShape GShape::subtractOp(GShape one, GShape other)
 {
     GShape s = one;
     s.m_sdf = (one.m_sdf > -other.m_sdf) ? one.m_sdf : -other.m_sdf;
