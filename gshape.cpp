@@ -21,7 +21,7 @@ GShape GShape::intersectOp(GShape& one, GShape& other)
 {
     GShape s = one;
     s.m_sdf = qMax(one.m_sdf, other.m_sdf);
-    s.m_emissive = one.m_sdf > other.m_sdf ? other.m_emissive : one.m_emissive;
+    s.m_emissive = one.m_sdf < other.m_sdf ? one.m_emissive : other.m_emissive;
     return s;
 }
 

@@ -18,12 +18,13 @@ GRayMarching::GRayMarching(QSize& size)
 void GRayMarching::draw()
 {
     this->draw_2d();
+//    this->test();
 }
 
 void GRayMarching::test()
 {
-    QVector2D p0 = QVector2D(0.5f, 0.5f);
-    float value = this->sample_2d(p0);
+    QVector2D p1 = QVector2D(0.9f, 0.1f);
+    float value = GSignDistanceFunction::capsule2D(p1, QVector2D(0.4f,0.4f), QVector2D(0.6f,0.6f), 0.1f);
 qDebug()<<value;
 }
 
@@ -83,10 +84,26 @@ GShape GRayMarching::scene_2d(QVector2D& p1)
 //    GShape r3 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.7f, 0.5f), 0.1f), 0.0f);
 //    return GShape::unionOp(GShape::unionOp(r1, r2), r3);
 
-    GShape r4 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.4f, 0.5f), 0.2f), 1.0f);
-    GShape r5 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.6f, 0.5f), 0.2f), 0.8f);
+//    GShape r4 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.4f, 0.5f), 0.2f), 1.0f);
+//    GShape r5 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.6f, 0.5f), 0.2f), 0.8f);
 //    return GShape::unionOp(r4, r5);
 //    return GShape::intersectOp(r4, r5);
-    return GShape::subtractOp(r4, r5);
+//    return GShape::subtractOp(r4, r5);
+
+//    return GShape(GSignDistanceFunction::plane2D(p1,QVector2D(0,0.5f),QVector2D(0,1)), 0.8f);
+
+//    GShape c6 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f, 0.5f), 0.2f), 1.0f);
+//    GShape p2 = GShape(GSignDistanceFunction::plane2D(p1,QVector2D(0,0.5f),QVector2D(0,1)), 0.8f);
+//    return GShape::intersectOp(c6, p2);
+
+//    return GShape(GSignDistanceFunction::segment2D(p1, QVector2D(0.4f,0.4f), QVector2D(0.6f,0.6f)), 1.0f);
+//    return GShape(GSignDistanceFunction::capsule2D(p1, QVector2D(0.4f,0.4f), QVector2D(0.6f,0.6f), 0.1f), 1.0f);
+
+//    return GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.1f), M_PI/16), 1.0f);
+//    return GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.1f), M_PI/16) - 0.1f, 1.0f);
+
+    return GShape(GSignDistanceFunction::triangle2D(p1,QVector2D(0.5f,0.2f),QVector2D(0.8f,0.8f),QVector2D(0.3f,0.6f)),1.0f);
+
+//    (QVector2D pt, QVector2D c0, QSize halfSize, double sita)
 }
 
