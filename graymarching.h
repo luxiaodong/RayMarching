@@ -19,6 +19,7 @@ private:
     void draw_2d();
     float sample_2d(QVector2D& p0);
     float rayMarching_2d(QVector2D& p0, QVector2D& dir);
+    QVector2D normal_2d(QVector2D& p0);
     GShape scene_2d(QVector2D& p1);
 
 public:

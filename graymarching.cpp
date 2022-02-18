@@ -36,11 +36,20 @@ void GRayMarching::draw_2d()
         for(int x = 0; x < size.width(); ++x)
         {
             QVector2D p0(1.0f*x/size.width(), 1.0f*y/size.height());
-            float value = this->sample_2d(p0);
-            if(value > 1.0f) value = 1.0f;
-            if(value < 0.0f) value = 0.0f;
-            int c = static_cast<int>(value*255);
-            m_image.setPixelColor(x, y, QColor(c,c,c));
+//            float value = this->sample_2d(p0);
+//            if(value > 1.0f) value = 1.0f;
+//            if(value < 0.0f) value = 0.0f;
+//            int c = static_cast<int>(value*255);
+//            m_image.setPixelColor(x, y, QColor(c,c,c));
+
+            QVector2D n = this->normal_2d(p0);
+            int r = (n.x()*0.5f + 0.5f) * 255;
+            int g = (n.y()*0.5f + 0.5f) * 255;
+            if(r > 255) r = 255;
+            if(g > 255) g = 255;
+            r = qMax(r, 0);
+            g = qMax(g, 0);
+            m_image.setPixelColor(x, y, QColor(r,g,0));
         }
     }
 }
@@ -75,6 +84,18 @@ float GRayMarching::rayMarching_2d(QVector2D& p0, QVector2D& dir)
     return 0.0f;
 }
 
+QVector2D GRayMarching::normal_2d(QVector2D& p0)
+{
+    float epsilon = m_maxEpsilon;
+    QVector2D pxa = QVector2D(p0.x()+epsilon, p0.y());
+    QVector2D pxn = QVector2D(p0.x()-epsilon, p0.y());
+    QVector2D pya = QVector2D(p0.x(), p0.y()+epsilon);
+    QVector2D pyn = QVector2D(p0.x(), p0.y()-epsilon);
+    float dx = (scene_2d(pxa).m_sdf - scene_2d(pxn).m_sdf)/(2*epsilon);
+    float dy = (scene_2d(pya).m_sdf - scene_2d(pyn).m_sdf)/(2*epsilon);
+    return QVector2D(dx, dy).normalized();
+}
+
 GShape GRayMarching::scene_2d(QVector2D& p1)
 {
 //    return GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f, 0.5f), 0.1f), 1.0f);
@@ -102,7 +123,12 @@ GShape GRayMarching::scene_2d(QVector2D& p1)
 //    return GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.1f), M_PI/16), 1.0f);
 //    return GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.1f), M_PI/16) - 0.1f, 1.0f);
 
-    return GShape(GSignDistanceFunction::triangle2D(p1,QVector2D(0.5f,0.2f),QVector2D(0.8f,0.8f),QVector2D(0.3f,0.6f)),1.0f);
+//    return GShape(GSignDistanceFunction::triangle2D(p1,QVector2D(0.5f,0.2f),QVector2D(0.8f,0.8f),QVector2D(0.3f,0.6f)),1.0f);
+
+    GShape c7 = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.4f, 0.2f), 0.1f), 2.0f);
+    GShape b1 = GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.8f), QVector2D(0.1f,0.1f), M_PI/16), 0.0f);
+    GShape b2 = GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.8f,0.5f), QVector2D(0.1f,0.1f), M_PI/16), 0.0f);
+    return GShape::unionOp(c7, GShape::unionOp(b1, b2));
 
 //    (QVector2D pt, QVector2D c0, QSize halfSize, double sita)
 }
