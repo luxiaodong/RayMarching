@@ -8,6 +8,11 @@ GRayMarching::GRayMarching(QSize& size)
 {
     m_image = QImage(size, QImage::Format_RGBA8888);
     m_image.fill(Qt::black);
+
+    m_sampleCount = 64;
+    m_maxStepCount = 64;
+    m_maxDistance = 2.0f;
+    m_maxEpsilon = 1e-6f;
 }
 
 void GRayMarching::draw()
@@ -43,24 +48,26 @@ void GRayMarching::draw_2d()
 float GRayMarching::sample_2d(QVector2D& p0)
 {
     float sum = 0.0f;
-    int count = 100;
-    for(int i = 0; i < count; ++i)
+    for(int i = 0; i < m_sampleCount; ++i)
     {
-        double sita = 2.0*M_PI*qrand()/RAND_MAX;
+//        double sita = 2.0*M_PI*i/m_sampleCount; //分层采样
+//        double sita = 2.0*M_PI*qrand()/RAND_MAX; //均匀采样
+        double sita = 2.0*M_PI*(i+ static_cast<double>(qrand())/RAND_MAX)/m_sampleCount; //抖动采样
         QVector2D dir = QVector2D( static_cast<float>(qCos(sita)), static_cast<float>(qSin(sita)));
         sum += this->rayMarching_2d(p0, dir);
     }
-    return sum/count;
+    return sum/m_sampleCount;
 }
 
 float GRayMarching::rayMarching_2d(QVector2D& p0, QVector2D& dir)
 {
     float t = 0.0f;
-    for(int i = 0; i < 50; ++i)
+    for(int i = 0; i < m_maxStepCount; ++i)
     {
         QVector2D p1 = p0 + dir*t;
         GShape shape = scene_2d(p1);
-        if(shape.m_sdf < 0.001f) return shape.m_emissive;
+        if(shape.m_sdf < m_maxEpsilon) return shape.m_emissive;
+        if(t > m_maxDistance) break;
         t += shape.m_sdf;
     }
 

@@ -23,6 +23,11 @@ private:
 
 public:
     QImage m_image; //输出图像
+
+    int m_sampleCount;
+    int m_maxStepCount;
+    float m_maxDistance;
+    float m_maxEpsilon;
 };
 
 #endif // GRAYMARCHING_H
