@@ -7,6 +7,7 @@
 
 GRayMarching::GRayMarching(QSize& size)
 {
+    m_filePath = "test.png";
     m_image = QImage(size, QImage::Format_RGBA8888);
     m_image.fill(Qt::black);
 
@@ -16,10 +17,6 @@ GRayMarching::GRayMarching(QSize& size)
     m_epsilon = 1e-6f;
     m_maxDepth = 5;
     m_normalBais = 1e-4f;
-
-//    m_sampleCount = 256;
-//    m_stepCount = 64;
-//    m_maxDepth = 3;
 }
 
 void GRayMarching::draw()
@@ -30,12 +27,9 @@ void GRayMarching::draw()
 
 void GRayMarching::test()
 {
-    m_filePath = "basic_final.png";
-    QVector2D p1 = QVector2D(0.9f, 0.1f);
-    float value = GSignDistanceFunction::capsule2D(p1, QVector2D(0.4f,0.4f), QVector2D(0.6f,0.6f), 0.1f);
+    m_filePath = "test.png";
     QString fullPath = QDir::currentPath() + QString("/../../../../RayMarching/image/") + m_filePath;
 qDebug()<<fullPath;
-qDebug()<<value;
     qDebug()<<m_image.save(fullPath);
 }
 
@@ -89,8 +83,6 @@ float GRayMarching::sample_2d(QVector2D& p0)
 
 float GRayMarching::trace_2d(QVector2D& p0, QVector2D& dir, int depth)
 {
-    // return trace_2d_old(p0, dir, depth);
-
     float t = 1e-3f;
     float sign = scene_2d(p0).m_sdf > 0.0f ? 1.0f : -1.0f;
     for(int i = 0; i < m_stepCount; ++i)
@@ -112,6 +104,9 @@ float GRayMarching::trace_2d(QVector2D& p0, QVector2D& dir, int depth)
                     QVector2D rDir = this->refract_2D(dir, nDir, ratio, isOk);
                     if(isOk)
                     {
+                        float cosi = - QVector2D::dotProduct(dir, nDir);
+                        float cost = - QVector2D::dotProduct(rDir, nDir);
+                        refl = sign < 0.0f ? fresnel_2D(cosi, cost, shape.m_ratio, 1.0f) : fresnel_2D(cosi, cost, 1.0f, shape.m_ratio);
                         QVector2D p2 = p1 - nDir*m_normalBais;
                         sum += (1.0f - refl) * trace_2d(p2, rDir, depth + 1);
                     }
@@ -135,6 +130,22 @@ float GRayMarching::trace_2d(QVector2D& p0, QVector2D& dir, int depth)
     }
 
     return 0.0f;
+}
+
+// https://zhuanlan.zhihu.com/p/31534769
+float GRayMarching::fresnel_2D(float cosi, float cost, float etai, float etat)
+{
+    float rs = (etat * cosi - etai * cost) / (etat * cosi + etai * cost);
+    float rp = (etai * cosi - etat * cost) / (etai * cosi + etat * cost);
+    return (rs * rs + rp * rp) * 0.5f;
+}
+
+float GRayMarching::schlick_2D(float cosi, float cost, float etai, float etat)
+{
+    float r1 = (etai - etat) / (etai + etat);
+    float r2 = r1*r1;
+    float a = 1.0f - (etai < etat ? cosi : cost);
+    return r2 + (1.0f-r2)*static_cast<float>(qPow(static_cast<double>(a), 5));
 }
 
 QVector2D GRayMarching::reflect_2D(QVector2D in, QVector2D n)
@@ -189,15 +200,20 @@ GShape GRayMarching::scene_2d(QVector2D& p1)
 //    return GShape::subtractOp(a, b);
 //    return GShape::subtractOp(b, a);
 
+//    m_filePath = "shapes_plane.png";
 //    return GShape(GSignDistanceFunction::plane2D(p1,QVector2D(0,0.5f),QVector2D(0,1)), 0.8f);
 
+//    m_filePath = "shapes_semicircle.png";
 //    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f, 0.5f), 0.2f), 1.0f);
 //    GShape b = GShape(GSignDistanceFunction::plane2D(p1,QVector2D(0,0.5f),QVector2D(0,1)), 0.8f);
 //    return GShape::intersectOp(a, b);
 
 //    return GShape(GSignDistanceFunction::segment2D(p1, QVector2D(0.4f,0.4f), QVector2D(0.6f,0.6f)), 1.0f);
+
+//    m_filePath = "shapes_capsule.png";
 //    return GShape(GSignDistanceFunction::capsule2D(p1, QVector2D(0.4f,0.4f), QVector2D(0.6f,0.6f), 0.1f), 1.0f);
 
+//    m_filePath = "shapes_box.png";
 //    return GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.1f), M_PI/16), 1.0f);
 //    return GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.1f), M_PI/16) - 0.1f, 1.0f);
 
@@ -228,16 +244,17 @@ GShape GRayMarching::scene_2d(QVector2D& p1)
 //    GShape b = GShape(GSignDistanceFunction::capsule2D(p2, QVector2D(0.75f,0.25f), QVector2D(0.5,0.75f), 0.05f), 1.0f);
 //    return a.m_sdf < b.m_sdf ? a : b;
 
-    m_filePath = "test.png";
-    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(-0.2f,-0.2f), 0.1f), 10.0f, 0.0f);
-    GShape b = GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.2f), 0.0), 0.2f, 0.2f, 1.5f);
-    return GShape::unionOp(a, b);
+//    m_filePath = "refraction_box.png";
+//    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(-0.2f,-0.2f), 0.1f), 10.0f, 0.0f);
+//    GShape b = GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.2f), 0.0), 0.2f, 0.2f, 1.5f);
+//    return GShape::unionOp(a, b);
 //    return b;
 
-//    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,-0.5f), 0.05f),20.0f);
-//    GShape b = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.2f), 0.35f),0.0f, 0.2f, 1.5f);
-//    GShape c = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.8f), 0.35f),0.0f, 0.2f, 1.5f);
-//    return GShape::unionOp(a, GShape::intersectOp(b, c));
+    m_filePath = "refraction_convexlens.png";
+    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,-0.5f), 0.05f),20.0f);
+    GShape b = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.2f), 0.35f),0.0f, 0.2f, 1.5f);
+    GShape c = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.8f), 0.35f),0.0f, 0.2f, 1.5f);
+    return GShape::unionOp(a, GShape::intersectOp(b, c));
 
 //    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,-0.5f), 0.05f),20.0f);
 //    GShape b = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.2f), 0.2f), 0.0f, 0.2f, 1.5f);

@@ -23,6 +23,8 @@ private:
     GShape scene_2d(QVector2D& p1);
     QVector2D reflect_2D(QVector2D in, QVector2D n);
     QVector2D refract_2D(QVector2D in, QVector2D n, float ratio, bool &isOk); //折射率
+    float fresnel_2D(float cosi, float cost, float etai, float etat);
+    float schlick_2D(float cosi, float cost, float etai, float etat);
 
 public:
     QImage m_image; //输出图像
