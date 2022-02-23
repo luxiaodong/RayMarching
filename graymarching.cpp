@@ -123,7 +123,7 @@ float GRayMarching::trace_2d(QVector2D& p0, QVector2D& dir, int depth)
                     sum += refl * this->trace_2d(p2, rDir, depth + 1);
                 }
             }
-            return sum;
+            return sum * beerLambert(shape.m_absorption, t);
         }
         t += shape.m_sdf * sign;
         if(t > m_maxDistance) break;
@@ -151,6 +151,11 @@ float GRayMarching::schlick_2D(float cosi, float cost, float etai, float etat)
 QVector2D GRayMarching::reflect_2D(QVector2D in, QVector2D n)
 {
     return in - 2*QVector2D::dotProduct(in, n)*n;
+}
+
+float GRayMarching::beerLambert(float absorption, float distance)
+{
+    return expf(-absorption*distance);
 }
 
 // ratio 空气与水的折射率比值
@@ -248,13 +253,17 @@ GShape GRayMarching::scene_2d(QVector2D& p1)
 //    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(-0.2f,-0.2f), 0.1f), 10.0f, 0.0f);
 //    GShape b = GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.2f), 0.0), 0.2f, 0.2f, 1.5f);
 //    return GShape::unionOp(a, b);
-//    return b;
 
-    m_filePath = "refraction_convexlens.png";
-    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,-0.5f), 0.05f),20.0f);
-    GShape b = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.2f), 0.35f),0.0f, 0.2f, 1.5f);
-    GShape c = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.8f), 0.35f),0.0f, 0.2f, 1.5f);
-    return GShape::unionOp(a, GShape::intersectOp(b, c));
+    m_filePath = "refraction_box_with_beer.png";
+    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(-0.2f,-0.2f), 0.1f), 10.0f, 0.0f, 0.0f, 0.4f);
+    GShape b = GShape(GSignDistanceFunction::box2D(p1, QVector2D(0.5f,0.5f), QVector2D(0.3f,0.2f), 0.0), 0.2f, 0.2f, 1.5f, 0.4f);
+    return GShape::unionOp(a, b);
+
+//    m_filePath = "refraction_convexlens.png";
+//    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,-0.5f), 0.05f),20.0f);
+//    GShape b = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.2f), 0.35f),0.0f, 0.2f, 1.5f);
+//    GShape c = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.8f), 0.35f),0.0f, 0.2f, 1.5f);
+//    return GShape::unionOp(a, GShape::intersectOp(b, c));
 
 //    GShape a = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,-0.5f), 0.05f),20.0f);
 //    GShape b = GShape(GSignDistanceFunction::circle(p1, QVector2D(0.5f,0.2f), 0.2f), 0.0f, 0.2f, 1.5f);

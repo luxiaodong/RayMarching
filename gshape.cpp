@@ -1,12 +1,13 @@
 #include "gshape.h"
 #include <QtMath>
 
-GShape::GShape(float sdf, float emissive, float reflectivity, float ratio)
+GShape::GShape(float sdf, float emissive, float reflectivity, float ratio, float absorption)
 {
     m_sdf = sdf;
     m_emissive = emissive;
     m_reflectivity = reflectivity;
     m_ratio = ratio;
+    m_absorption = absorption;
 }
 
 GShape GShape::unionOp(GShape one, GShape other)
